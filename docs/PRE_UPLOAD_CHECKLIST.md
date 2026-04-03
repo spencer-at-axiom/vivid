@@ -39,11 +39,11 @@ Use this before pushing the repo to public GitHub.
 - [x] `npm --workspace apps/desktop run e2e:critical`
 - [x] `npm --workspace apps/desktop run e2e:real-sidecar`
 - [x] Fresh-clone install/run smoke test
-- [ ] GitHub Actions green on the branch being published
+- [x] GitHub Actions green on the branch being published
 
 ## 6. GitHub Hygiene
 
-- [ ] Add a short repo description and topic tags that match the current WIP state.
+- [x] Add a short repo description and topic tags that match the current WIP state.
 - [x] Decide whether Issues/Discussions should be enabled on day one.
 - [x] Make sure screenshots, badges, and release language do not overclaim readiness.
 
@@ -52,7 +52,8 @@ Day-one policy decision:
 - Keep Discussions disabled until maintainers can commit to moderation cadence.
 
 Blocked items requiring a pushed GitHub repository:
-- GitHub Actions branch checks cannot run until this repository is pushed.
-- Repo description/topic tags can be set only after the GitHub repository exists.
+- Resolved on April 3, 2026 after push to `main`:
+- GitHub Actions CI run `23936715980` completed with conclusion `success`.
+- Repo description and topic tags were set to reflect pre-release WIP status.
 
 Public upload is reasonable only after the security/correctness items are fixed and the repo contents are legally and operationally safe to publish.
