@@ -1,6 +1,6 @@
 # Vivid Studio
 
-Experimental local-first AI image studio built with Tauri, React, and FastAPI.
+Experimental local-first AI image studio built with Tauri, React, and FastAPI. Vibe coded everything with Codex. Don't understand half of it. 
 
 > Status: work in progress. This repo is not production-ready, not security-hardened, and should not be described as a shipped V1. It is being cleaned up for a straightforward public open-source release.
 
