@@ -6,8 +6,8 @@ Use this before pushing the repo to public GitHub.
 
 - [x] Add a real root `LICENSE` file.
 - [x] Review `reference/` and any bundled assets to confirm they are safe to publish.
-- [ ] Confirm `.secrets/`, local caches, generated installers, bundled binaries, and other machine-local outputs are not tracked.
-- [ ] Verify the repo from an actual Git checkout, not from an exported workspace.
+- [x] Confirm `.secrets/`, local caches, generated installers, bundled binaries, and other machine-local outputs are not tracked.
+- [x] Verify the repo from an actual Git checkout, not from an exported workspace.
 
 ## 2. Product Correctness And Security
 
@@ -27,7 +27,7 @@ Use this before pushing the repo to public GitHub.
 ## 4. Documentation
 
 - [x] Keep the root `README.md` as the primary public landing page.
-- [ ] Make sure every command shown in the README works on a clean checkout.
+- [x] Make sure every command shown in the README works on a clean checkout.
 - [x] Keep only a minimal public doc path: `README.md` plus this checklist.
 - [x] Clearly label the remaining `docs/` pages as maintainer notes or historical release artifacts when they are not public-facing.
 
@@ -38,7 +38,7 @@ Use this before pushing the repo to public GitHub.
 - [x] `npm run test:sidecar`
 - [x] `npm --workspace apps/desktop run e2e:critical`
 - [x] `npm --workspace apps/desktop run e2e:real-sidecar`
-- [ ] Fresh-clone install/run smoke test
+- [x] Fresh-clone install/run smoke test
 - [ ] GitHub Actions green on the branch being published
 
 ## 6. GitHub Hygiene
@@ -51,8 +51,8 @@ Day-one policy decision:
 - Enable Issues.
 - Keep Discussions disabled until maintainers can commit to moderation cadence.
 
-Blocked items requiring a real GitHub branch/checkout:
-- This workspace does not include `.git`, so tracked-file state and fresh-clone validation cannot be proven here.
-- GitHub branch checks, repo description/topics, and final repository settings require GitHub access.
+Blocked items requiring a pushed GitHub repository:
+- GitHub Actions branch checks cannot run until this repository is pushed.
+- Repo description/topic tags can be set only after the GitHub repository exists.
 
 Public upload is reasonable only after the security/correctness items are fixed and the repo contents are legally and operationally safe to publish.
