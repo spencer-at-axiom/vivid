@@ -1,0 +1,23 @@
+{
+  "name": "vivid-studio",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/desktop"
+  ],
+  "scripts": {
+    "dev": "powershell -ExecutionPolicy Bypass -File scripts/dev.ps1",
+    "dev:desktop": "npm --workspace apps/desktop run dev",
+    "build:desktop": "npm --workspace apps/desktop run build",
+    "typecheck:desktop": "npm --workspace apps/desktop run typecheck",
+    "lint:desktop": "npm --workspace apps/desktop run lint",
+    "install:sidecar": "node scripts/run_python.mjs -m pip install -e services/inference[dev] pyinstaller",
+    "dev:sidecar": "node scripts/run_python.mjs -m uvicorn vivid_inference.main:app --reload --host 127.0.0.1 --port 8765 --app-dir services/inference",
+    "test:sidecar": "node scripts/run_python.mjs -m pytest services/inference/tests",
+    "build:sidecar:binary": "node scripts/run_python.mjs scripts/build_sidecar_binary.py",
+    "tauri:dev": "npm --workspace apps/desktop run tauri dev",
+    "tauri:build": "npm --workspace apps/desktop run tauri build",
+    "release:prepare:tauri": "node scripts/configure_tauri_release.mjs",
+    "release:bootstrap:signing": "powershell -ExecutionPolicy Bypass -File scripts/bootstrap_release_signing.ps1"
+  }
+}

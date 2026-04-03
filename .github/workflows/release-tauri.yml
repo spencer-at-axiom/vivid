@@ -1,0 +1,228 @@
+name: Release (Signed Tauri)
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release-preflight:
+    runs-on: ubuntu-latest
+    outputs:
+      signed_ready: ${{ steps.check.outputs.signed_ready }}
+    steps:
+      - id: check
+        shell: bash
+        run: |
+          if [[ -n "${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}" && -n "${{ secrets.VIVID_UPDATER_PUBKEY }}" && -n "${{ secrets.VIVID_UPDATER_ENDPOINT }}" ]]; then
+            echo "signed_ready=true" >> "$GITHUB_OUTPUT"
+            echo "Signed release path enabled."
+          else
+            echo "signed_ready=false" >> "$GITHUB_OUTPUT"
+            echo "Signed release secrets are missing; workflow will build unsigned artifacts."
+          fi
+
+  publish-tauri-signed:
+    name: Publish signed updater release (${{ matrix.platform }})
+    needs: release-preflight
+    if: ${{ needs.release-preflight.outputs.signed_ready == 'true' }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-22.04
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install sidecar build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+          python -m pip install -e services/inference
+
+      - name: Build and stage sidecar binary
+        run: python scripts/build_sidecar_binary.py
+
+      - name: Enable updater config for release build
+        env:
+          VIVID_UPDATER_PUBKEY: ${{ secrets.VIVID_UPDATER_PUBKEY }}
+          VIVID_UPDATER_ENDPOINT: ${{ secrets.VIVID_UPDATER_ENDPOINT }}
+        run: npm run release:prepare:tauri
+
+      - name: Normalize updater signing key
+        id: signing_key
+        shell: bash
+        env:
+          RAW_TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          {
+            echo "private_key<<EOF"
+            printf '%b\n' "$RAW_TAURI_SIGNING_PRIVATE_KEY"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and publish signed artifacts
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ steps.signing_key.outputs.private_key }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          projectPath: apps/desktop
+          tagName: vivid-v__VERSION__
+          releaseName: "Vivid v__VERSION__"
+          releaseBody: |
+            Automated Vivid release.
+            Signing status: updater artifacts signed.
+            Updater artifacts: enabled and signed.
+            OS-level Windows/macOS code signing requires separate platform certificate configuration.
+          releaseDraft: true
+          prerelease: false
+
+      - name: Verify updater artifacts against configured public key
+        env:
+          VIVID_UPDATER_PUBKEY: ${{ secrets.VIVID_UPDATER_PUBKEY }}
+        run: >
+          cargo run --manifest-path apps/desktop/src-tauri/Cargo.toml --bin verify_updater_signature --
+          --pubkey-env VIVID_UPDATER_PUBKEY
+          --root apps/desktop/src-tauri/target/release/bundle
+          --summary-out apps/desktop/src-tauri/target/release/updater-verification-${{ matrix.platform }}.json
+
+      - name: Verify bundled sidecar launch (Windows release binary smoke)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:VIVID_SIDECAR_SMOKE_TEST = "1"
+          & "apps/desktop/src-tauri/target/release/vivid_desktop.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify bundled sidecar launch (Unix release binary smoke)
+        if: runner.os != 'Windows'
+        run: VIVID_SIDECAR_SMOKE_TEST=1 ./apps/desktop/src-tauri/target/release/vivid_desktop
+
+      - name: Upload signed release verification artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-release-verification-${{ matrix.platform }}
+          path: |
+            apps/desktop/src-tauri/target/release/updater-verification-${{ matrix.platform }}.json
+            apps/desktop/src-tauri/target/release/bundle/**/*.sig
+
+  build-tauri-unsigned:
+    name: Build unsigned fallback (${{ matrix.platform }})
+    needs: release-preflight
+    if: ${{ needs.release-preflight.outputs.signed_ready != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-22.04
+          - windows-latest
+          - macos-latest
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install sidecar build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller
+          python -m pip install -e services/inference
+
+      - name: Build and stage sidecar binary
+        run: python scripts/build_sidecar_binary.py
+
+      - name: Build unsigned desktop artifacts
+        run: npm --workspace apps/desktop run tauri build
+
+      - name: Verify bundled sidecar launch (Windows release binary smoke)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:VIVID_SIDECAR_SMOKE_TEST = "1"
+          & "apps/desktop/src-tauri/target/release/vivid_desktop.exe"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Verify bundled sidecar launch (Unix release binary smoke)
+        if: runner.os != 'Windows'
+        run: VIVID_SIDECAR_SMOKE_TEST=1 ./apps/desktop/src-tauri/target/release/vivid_desktop
+
+      - name: Generate unsigned release notes
+        run: >
+          python -c "from pathlib import Path;
+          Path('apps/desktop/src-tauri/target/release/UNSIGNED_RELEASE_NOTES.md').write_text(
+          'Automated Vivid release fallback.\\nSigning status: unsigned (fallback path; non-default).\\nUpdater artifacts: not signed for updater publication.\\n',
+          encoding='utf-8')"
+
+      - name: Upload unsigned bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: vivid-unsigned-${{ matrix.platform }}
+          path: |
+            apps/desktop/src-tauri/target/release/bundle/**
+            apps/desktop/src-tauri/target/release/UNSIGNED_RELEASE_NOTES.md

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vivid-inference"
+version = "0.1.0"
+description = "Vivid Studio local inference sidecar"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.116.0",
+  "uvicorn[standard]>=0.35.0",
+  "pydantic>=2.8.0",
+  "pillow>=10.0.0",
+  "numpy>=1.24.0",
+  "torch>=2.0.0",
+  "diffusers>=0.30.0",
+  "transformers>=4.40.0",
+  "accelerate>=0.30.0",
+  "huggingface-hub>=0.23.0",
+  "safetensors>=0.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0.0",
+  "pytest-asyncio>=0.24.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vivid_inference*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

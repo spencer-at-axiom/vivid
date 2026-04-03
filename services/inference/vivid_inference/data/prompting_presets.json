@@ -1,0 +1,180 @@
+{
+  "version": 1,
+  "latency_target_ms": 250,
+  "starter_intents": [
+    {
+      "id": "photo",
+      "title": "Photo",
+      "description": "Portraits, editorial scenes, and natural-light photography.",
+      "starter_prompt": "A cinematic portrait in natural window light, detailed skin texture, professional photography",
+      "style_id": "cinematic",
+      "negative_chip_ids": ["low-quality", "text-watermark", "framing"],
+      "recommended_model_family": "sdxl",
+      "recommended_model_ids": [
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        "runwayml/stable-diffusion-v1-5"
+      ],
+      "aspect_ratio": "portrait",
+      "enhancer_fragments": [
+        "single focal subject",
+        "clean lighting hierarchy",
+        "natural depth separation"
+      ]
+    },
+    {
+      "id": "illustration",
+      "title": "Illustration",
+      "description": "Stylized art, concepts, and graphic key visuals.",
+      "starter_prompt": "A bold editorial illustration of a futuristic city at sunrise, vibrant colors, digital art",
+      "style_id": "illustration",
+      "negative_chip_ids": ["low-quality", "artifacts", "framing"],
+      "recommended_model_family": "sdxl",
+      "recommended_model_ids": [
+        "stabilityai/stable-diffusion-xl-base-1.0",
+        "black-forest-labs/FLUX.1-dev"
+      ],
+      "aspect_ratio": "landscape",
+      "enhancer_fragments": [
+        "strong silhouette read",
+        "clear foreground and background separation",
+        "intentional color hierarchy"
+      ]
+    },
+    {
+      "id": "product-mockup",
+      "title": "Product Mockup",
+      "description": "Commercial product shots with clean, brand-safe framing.",
+      "starter_prompt": "Premium skincare bottle on a textured studio set with soft shadows, product photography",
+      "style_id": "product-shot",
+      "negative_chip_ids": ["low-quality", "text-watermark", "framing"],
+      "recommended_model_family": "sd15",
+      "recommended_model_ids": [
+        "runwayml/stable-diffusion-v1-5",
+        "stabilityai/stable-diffusion-xl-base-1.0"
+      ],
+      "aspect_ratio": "square",
+      "enhancer_fragments": [
+        "centered hero product",
+        "controlled studio highlights",
+        "clean commercial composition"
+      ]
+    }
+  ],
+  "styles": [
+    {
+      "id": "none",
+      "label": "None",
+      "category": "Core",
+      "positive": "{prompt}",
+      "negative": "",
+      "tags": ["neutral"],
+      "family_defaults": {
+        "sdxl": { "positive": "", "negative": "" },
+        "sd15": { "positive": "", "negative": "" },
+        "flux": { "positive": "", "negative": "" }
+      }
+    },
+    {
+      "id": "cinematic",
+      "label": "Cinematic",
+      "category": "Look",
+      "positive": "{prompt}, cinematic lighting, dramatic composition, film grain, high dynamic range",
+      "negative": "flat lighting, overexposed, washed out, low contrast",
+      "tags": ["film", "moody"],
+      "family_defaults": {
+        "sdxl": { "positive": "subtle lens depth, premium tonal rolloff", "negative": "" },
+        "sd15": { "positive": "35mm photography language, practical contrast", "negative": "muddy shadows" },
+        "flux": { "positive": "clean photographic realism", "negative": "oversharpened skin" }
+      }
+    },
+    {
+      "id": "illustration",
+      "label": "Illustration",
+      "category": "Art",
+      "positive": "{prompt}, editorial illustration, painterly detail, clean silhouettes, rich color harmony",
+      "negative": "photographic noise, 3d render artifacts, muddy lines",
+      "tags": ["painterly", "graphic"],
+      "family_defaults": {
+        "sdxl": { "positive": "confident brush texture", "negative": "" },
+        "sd15": { "positive": "poster-ready shapes", "negative": "mushy edges" },
+        "flux": { "positive": "clean graphic read", "negative": "photographic realism" }
+      }
+    },
+    {
+      "id": "anime",
+      "label": "Anime",
+      "category": "Character",
+      "positive": "{prompt}, anime key visual, expressive eyes, clean linework, vibrant palette",
+      "negative": "realistic skin pores, uncanny face, extra limbs, malformed hands",
+      "tags": ["stylized", "character"],
+      "family_defaults": {
+        "sdxl": { "positive": "polished cel shading", "negative": "" },
+        "sd15": { "positive": "classic anime poster finish", "negative": "rough line wobble" },
+        "flux": { "positive": "highly intentional character read", "negative": "photographic lighting" }
+      }
+    },
+    {
+      "id": "product-shot",
+      "label": "Product Shot",
+      "category": "Commercial",
+      "positive": "{prompt}, studio product photography, controlled highlights, clean reflections, minimal backdrop",
+      "negative": "cluttered background, soft focus, lens dirt, motion blur",
+      "tags": ["photo", "clean", "commercial"],
+      "family_defaults": {
+        "sdxl": { "positive": "premium material realism", "negative": "" },
+        "sd15": { "positive": "tight tabletop composition", "negative": "noisy reflections" },
+        "flux": { "positive": "brand-safe lighting", "negative": "messy set dressing" }
+      }
+    },
+    {
+      "id": "concept-art",
+      "label": "Concept Art",
+      "category": "Worldbuilding",
+      "positive": "{prompt}, concept art, atmosphere depth, volumetric light, strong focal storytelling",
+      "negative": "flat depth, blank background, low detail, repetitive texture",
+      "tags": ["environment", "epic"],
+      "family_defaults": {
+        "sdxl": { "positive": "layered depth cues", "negative": "" },
+        "sd15": { "positive": "clear matte-painting silhouette", "negative": "soft structure" },
+        "flux": { "positive": "coherent environmental realism", "negative": "empty midground" }
+      }
+    }
+  ],
+  "negative_prompt_chips": [
+    {
+      "id": "low-quality",
+      "label": "Low Quality",
+      "fragment": "blurry, low quality",
+      "category": "fidelity",
+      "tags": ["quality"]
+    },
+    {
+      "id": "artifacts",
+      "label": "Artifacts",
+      "fragment": "jpeg artifacts, compression artifacts, pixelated",
+      "category": "fidelity",
+      "tags": ["compression", "cleanup"]
+    },
+    {
+      "id": "anatomy",
+      "label": "Anatomy",
+      "fragment": "extra limbs, malformed hands, deformed anatomy",
+      "category": "subject",
+      "tags": ["people", "hands"]
+    },
+    {
+      "id": "text-watermark",
+      "label": "Text / Watermark",
+      "fragment": "text, watermark, signature",
+      "category": "cleanup",
+      "tags": ["text", "branding"]
+    },
+    {
+      "id": "framing",
+      "label": "Bad Framing",
+      "fragment": "cropped, out of frame, cut off subject",
+      "category": "composition",
+      "tags": ["composition"]
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  pull_request:
+  merge_group:
+    types:
+      - checks_requested
+  push:
+    branches:
+      - main
+
+jobs:
+  desktop-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck:desktop
+      - run: npm run build:desktop
+
+  backend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e "services/inference[dev]"
+      - run: pytest services/inference/tests -v
+
+  playwright-smoke:
+    name: Playwright smoke (${{ matrix.platform }} / ${{ matrix.profile }})
+    runs-on: ${{ matrix.platform }}
+    needs:
+      - backend-tests
+      - desktop-checks
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        profile:
+          - low_vram
+          - balanced
+          - quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: npm ci
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e "services/inference[dev]"
+      - if: runner.os == 'Linux'
+        run: npx playwright install --with-deps chromium
+      - if: runner.os != 'Linux'
+        run: npx playwright install chromium
+      - run: npm --workspace apps/desktop run e2e:smoke
+        env:
+          VIVID_E2E_PYTHON: python
+          VIVID_SMOKE_PROFILE: ${{ matrix.profile }}
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-smoke-${{ matrix.platform }}-${{ matrix.profile }}
+          if-no-files-found: warn
+          path: |
+            apps/desktop/test-results/**
+            apps/desktop/playwright-report/**

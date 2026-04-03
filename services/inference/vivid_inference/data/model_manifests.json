@@ -1,0 +1,156 @@
+{
+  "sd15": {
+    "family": "sd15",
+    "default_precision": "fp16",
+    "required_files": [
+      "model_index.json",
+      "scheduler/scheduler_config.json",
+      "tokenizer/tokenizer_config.json",
+      "text_encoder/config.json",
+      "unet/config.json",
+      "vae/config.json"
+    ],
+    "required_any_of": [
+      [
+        "unet/diffusion_pytorch_model.safetensors",
+        "unet/diffusion_pytorch_model.bin"
+      ],
+      [
+        "vae/diffusion_pytorch_model.safetensors",
+        "vae/diffusion_pytorch_model.bin"
+      ],
+      [
+        "text_encoder/model.safetensors",
+        "text_encoder/pytorch_model.bin"
+      ]
+    ],
+    "allow_patterns": [
+      "README.md",
+      "*.md",
+      "model_index.json",
+      "scheduler/*",
+      "text_encoder/*",
+      "tokenizer/*",
+      "unet/*",
+      "vae/*"
+    ],
+    "ignore_patterns": [
+      "*.ckpt",
+      "*.gguf",
+      "*.onnx",
+      "*.pt",
+      "docs/*",
+      "flax/*",
+      "onnx/*",
+      "openvino/*",
+      "samples/*",
+      "training/*"
+    ]
+  },
+  "sdxl": {
+    "family": "sdxl",
+    "default_precision": "fp16",
+    "required_files": [
+      "model_index.json",
+      "scheduler/scheduler_config.json",
+      "tokenizer/tokenizer_config.json",
+      "tokenizer_2/tokenizer_config.json",
+      "text_encoder/config.json",
+      "text_encoder_2/config.json",
+      "unet/config.json",
+      "vae/config.json"
+    ],
+    "required_any_of": [
+      [
+        "unet/diffusion_pytorch_model.safetensors",
+        "unet/diffusion_pytorch_model.bin"
+      ],
+      [
+        "vae/diffusion_pytorch_model.safetensors",
+        "vae/diffusion_pytorch_model.bin"
+      ],
+      [
+        "text_encoder/model.safetensors",
+        "text_encoder/pytorch_model.bin"
+      ],
+      [
+        "text_encoder_2/model.safetensors",
+        "text_encoder_2/pytorch_model.bin"
+      ]
+    ],
+    "allow_patterns": [
+      "README.md",
+      "*.md",
+      "model_index.json",
+      "scheduler/*",
+      "text_encoder/*",
+      "text_encoder_2/*",
+      "tokenizer/*",
+      "tokenizer_2/*",
+      "unet/*",
+      "vae/*"
+    ],
+    "ignore_patterns": [
+      "*.ckpt",
+      "*.gguf",
+      "*.onnx",
+      "*.pt",
+      "docs/*",
+      "flax/*",
+      "onnx/*",
+      "openvino/*",
+      "samples/*",
+      "training/*"
+    ]
+  },
+  "flux": {
+    "family": "flux",
+    "default_precision": "bf16",
+    "required_files": [
+      "model_index.json",
+      "scheduler/scheduler_config.json",
+      "text_encoder_2/config.json",
+      "tokenizer_2/tokenizer_config.json",
+      "transformer/config.json",
+      "vae/config.json"
+    ],
+    "required_any_of": [
+      [
+        "transformer/diffusion_pytorch_model.safetensors",
+        "transformer/diffusion_pytorch_model.bin"
+      ],
+      [
+        "vae/diffusion_pytorch_model.safetensors",
+        "vae/diffusion_pytorch_model.bin"
+      ],
+      [
+        "text_encoder_2/model.safetensors",
+        "text_encoder_2/pytorch_model.bin"
+      ]
+    ],
+    "allow_patterns": [
+      "README.md",
+      "*.md",
+      "model_index.json",
+      "scheduler/*",
+      "text_encoder/*",
+      "text_encoder_2/*",
+      "tokenizer/*",
+      "tokenizer_2/*",
+      "transformer/*",
+      "vae/*"
+    ],
+    "ignore_patterns": [
+      "*.ckpt",
+      "*.gguf",
+      "*.onnx",
+      "*.pt",
+      "docs/*",
+      "flax/*",
+      "onnx/*",
+      "openvino/*",
+      "samples/*",
+      "training/*"
+    ]
+  }
+}
